@@ -1,0 +1,9 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { newSheet, branch, person, people, remove, validate } from './model.js';
+test('one person counts once and unselected people are excluded', () => { const s = newSheet('A'); const p = person('Nimal'); s.children[0].children.push(p, person('Amal')); assert.equal(people(s).filter(p => p.invited).length, 0); p.invited = true; assert.equal(people(s).filter(p => p.invited).length, 1); p.invited = false; assert.equal(people(s).filter(p => p.invited).length, 0); });
+test('sheets are independent and nested paths retain ancestry', () => { const a = newSheet('A'), b = newSheet('B'); const cousins = branch('Cousins'), p = person('Guest'); p.invited = true; cousins.children.push(p); a.children[0].children.push(cousins); assert.equal(people(a).length, 1); assert.equal(people(b).length, 0); assert.equal(people(a)[0].path, 'Father’s side / Cousins'); remove(a, cousins.id); assert.equal(people(a).length, 0); });
+test('backup round trip preserves invite state', () => { const s = newSheet('A'); const p = person('සිංහල'); p.invited = true; s.children[0].children.push(p); const d = {version:1,sheets:[s]}; assert.deepEqual(validate(JSON.parse(JSON.stringify(d))), d); });
+test('invalid backups reject duplicate IDs and malformed people', () => { const s = newSheet('A'); s.children.push(s.children[0]); assert.throws(() => validate({version:1,sheets:[s]})); assert.throws(() => validate({version:2,sheets:[]})); const b = newSheet('B'); b.children.push({id:'bad',type:'person',name:'Guest',invited:'yes'}); assert.throws(() => validate({version:1,sheets:[b]})); });
+test('overdeep backup is rejected', () => { const s = newSheet('A'); let n = s; for(let i=0;i<25;i++){const b=branch('Nested'); n.children.push(b); n=b;} assert.throws(()=>validate({version:1,sheets:[s]})); });
+

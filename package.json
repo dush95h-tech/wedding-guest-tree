@@ -1,0 +1,2 @@
+{"name":"wedding-guest-tree","version":"1.0.0","private":true,"type":"module","scripts":{"test":"node --test *.test.js","start":"node server.js"}}
+
