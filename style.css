@@ -24,3 +24,4 @@
 .tree-root .card:hover { box-shadow:0 5px 16px #243e3618; }
 .stats article:nth-child(2) { background:#edf3fc; border-color:#d4e1f4; }
 .stats article:nth-child(3) { background:#fff5e5; border-color:#efdfc4; }
+.header-actions{display:flex;flex-wrap:wrap;gap:10px;justify-content:flex-end}.header-actions .outline{font-size:13px;font-weight:600;background:#fffefa}@media(max-width:650px){.header-actions{width:100%;margin-top:10px}}

@@ -30,7 +30,7 @@ function renderNode(node, root = false, depth = 0) {
 function table(list) { const t = el('table'), head = el('thead'), hr = el('tr'); ['#', 'Guest name', 'Branch'].forEach(s => hr.append(el('th', s))); head.append(hr); const body = el('tbody'); list.forEach((p, i) => { const r = el('tr'); [i + 1, p.name, p.path].forEach(v => r.append(el('td', v))); body.append(r); }); t.append(head, body); return t; }
 function render() {
   const s = sheet(); $('sheets').replaceChildren(); data.sheets.forEach(item => { const b = button('♧  ' + item.name, () => { active = item.id; save(); }, 'sheet ' + (item.id === active ? 'active' : '')); b.setAttribute('aria-current', item.id === active ? 'page' : 'false'); b.append(el('span', people(item).filter(p => p.invited).length, 'sheet-count')); $('sheets').append(b); });
-  $('empty').hidden = !!s; $('workspace').hidden = !s; $('print').disabled = !s; $('export').disabled = !data.sheets.length;
+  $('empty').hidden = !!s; $('workspace').hidden = !s; $('print').disabled = !s; $('excel').disabled = !s; $('export').disabled = !data.sheets.length;
   $('title').textContent = s?.name || 'Make room for everyone.'; $('subtitle').textContent = s ? 'Bring your people together, one branch at a time.' : 'Your people, thoughtfully brought together.';
   if (!s) return;
   const all = people(s), invited = all.filter(p => p.invited); $('invited').textContent = invited.length; $('total').textContent = all.length; $('pending').textContent = all.length - invited.length; $('list-count').textContent = invited.length;
@@ -48,8 +48,22 @@ $('tree-tab').onclick = () => { view = 'tree'; render(); }; $('list-tab').onclic
 $('expand').onclick = () => { collapsed.clear(); render(); }; $('collapse').onclick = () => { function walk(n) { if (n.type === 'group') collapsed.add(n.id); n.children?.forEach(walk); } walk(sheet()); render(); };
 $('zoom').onchange = () => { $('tree').style.zoom = $('zoom').value; };
 $('print').onclick = () => { render(); window.print(); };
+$('excel').onclick = async () => {
+  const current = sheet(); if (!current) return;
+  const exportSheet = structuredClone(current);
+  $('excel').disabled = true; $('excel').textContent = 'Preparing Excel…';
+  try {
+    const { downloadExcel } = await import('./excel-export.js');
+    downloadExcel(exportSheet);
+    message('Excel download started: Category Summary, All Guests, and Invited Guests.');
+  } catch (error) {
+    console.error('Excel export failed', error);
+    message('Excel export could not finish. Refresh the page and try again. Your sheet is still saved.');
+  } finally { $('excel').disabled = !sheet(); $('excel').textContent = '↓ Export to Excel'; }
+};
 $('export').onclick = () => { const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' })); const a = el('a'); a.href = url; a.download = 'wedding-guest-tree-backup.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); message('Backup exported. Keep this file to restore your sheets.'); };
 $('import').onclick = () => $('file').click();
 $('file').onchange = async () => { const file = $('file').files[0]; if (!file) return; try { if (file.size > 5000000) throw Error('Backup is too large (maximum 5 MB).'); const imported = validate(JSON.parse(await file.text())); if (data.sheets.length + imported.sheets.length > 200) throw Error('Maximum 200 sheets.'); function rekey(n) { n.id = uid(); n.children?.forEach(rekey); } imported.sheets.forEach(rekey); data.sheets.push(...imported.sheets); active = imported.sheets[0]?.id || active; save(); message('Backup imported as new sheets. Your existing sheets were kept.'); } catch (e) { message('Import failed: ' + e.message); } finally { $('file').value = ''; } };
 window.addEventListener('storage', e => { if (e.key === KEY) { try { data = e.newValue ? validate(JSON.parse(e.newValue)) : { version: 1, sheets: [] }; active = data.sheets.find(s => s.id === active)?.id || data.sheets[0]?.id; render(); message('Updated from another tab.'); } catch { message('Another tab saved unreadable data. Export your current work.'); } } });
 render(); if (storageFailed) message('Saved data could not be loaded. Export any backup before making changes; browser storage may be unavailable.');
+

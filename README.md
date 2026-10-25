@@ -9,6 +9,9 @@ A responsive wedding invitation planner, built with plain HTML, CSS and JavaScri
 3. Add each person as their own card. Tick their checkbox to invite them.
 4. View live sheet and branch counts, then open **Invited list**.
 5. Choose **Print / Save PDF** and select **Save as PDF** in the browser print dialog. Only invited people in the current sheet are printed.
+6. Choose **Export to Excel** to download the current sheet as an `.xlsx` workbook. **Category Summary** includes totals for each main branch, **All Guests** contains everyone with category, subgroup path and invitation status, and **Invited Guests** contains only selected people. Column filters help you view a specific family branch. This is a snapshot: editing the Excel file does not update the app.
+
+Excel export runs in the browser using a local copy of SheetJS CE 0.20.3, downloaded from its official distribution. See `SHEETJS-LICENSE.txt`. Guest data is not uploaded for export.
 
 Sheets are saved in this browser's local storage. Different browsers/devices have separate data. There are no private user accounts, cloud sync, or simultaneous shared editing. People sharing a browser can see its sheets. Export a JSON backup before clearing browser data; import adds copies without replacing existing sheets. Guest data is never committed to GitHub or sent to a server. Google Fonts is used for typography with local fallback fonts.
 
