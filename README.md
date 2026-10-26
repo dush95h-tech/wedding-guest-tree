@@ -1,35 +1,39 @@
-# Wedding Guest Tree
+# Together — Wedding Planner
 
-A responsive wedding invitation planner, built with plain HTML, CSS and JavaScript. No build tools, accounts, or database required.
+A wedding planner for two partners, hosted on GitHub Pages with private shared data in Supabase.
 
-## Use
+[Open the planner](https://dush95h-tech.github.io/wedding-guest-tree/)
 
-1. Create a named sheet for a person or celebration.
-2. Add branches such as Father's side, Mother's side, and Friends. Add sub-branches as needed.
-3. Add each person as their own card. Tick their checkbox to invite them.
-4. View live sheet and branch counts, then open **Invited list**.
-5. Choose **Print / Save PDF** and select **Save as PDF** in the browser print dialog. Only invited people in the current sheet are printed.
-6. Choose **Export to Excel** to download the current sheet as an `.xlsx` workbook. **Category Summary** includes totals for each main branch, **All Guests** contains everyone with category, subgroup path and invitation status, and **Invited Guests** contains only selected people. Column filters help you view a specific family branch. This is a snapshot: editing the Excel file does not update the app.
+## Features
 
-Excel export runs in the browser using a local copy of SheetJS CE 0.20.3, downloaded from its official distribution. See `SHEETJS-LICENSE.txt`. Guest data is not uploaded for export.
+- Overview with LKR budget totals, upcoming events and in-app reminders.
+- Colorful guest mindmap: one person per card, nested family categories, invitation selection, manual event RSVP and meal preferences.
+- Budget estimates, agreed costs, deposits, installments and payment due dates.
+- Tasks, starter checklist, vendors, multiple events and wedding-day timelines.
+- Event seating with capacity and duplicate-assignment checks.
+- Categorized guest Excel, budget Excel, print/PDF and complete JSON backups.
+- Separate partner accounts, private workspace, seven-day single-use partner invitations and revision checks to prevent silent overwrites.
+- Original guest sheets can be imported as categories. The [original planner](https://dush95h-tech.github.io/wedding-guest-tree/legacy.html) and its browser data remain available.
 
-Sheets are saved in this browser's local storage. Different browsers/devices have separate data. There are no private user accounts, cloud sync, or simultaneous shared editing. People sharing a browser can see its sheets. Export a JSON backup before clearing browser data; import adds copies without replacing existing sheets. Guest data is never committed to GitHub or sent to a server. Google Fonts is used for typography with local fallback fonts.
+## Start
 
-## Develop
+Create an app account and confirm your email, then choose **Create our wedding**. In Settings, create a partner invitation. Your partner creates their own account and chooses **Join partner’s wedding** using that code. They should not create a separate wedding.
 
-Requires Node.js 20 or later. No dependency installation needed.
+The public Supabase connection values are already configured. The database schema and authentication return URLs are installed. Email confirmation and password reset still need verification with your actual addresses; Supabase's default email sender restricts recipients. See [SETUP.md](SETUP.md) for email configuration and troubleshooting.
+
+**Explore local demo** stores only demonstration data in the current browser, separately from the shared workspace.
+
+## Development and checks
+
+No build or npm installation is required. With Node.js installed:
 
 ```sh
-npm start
-npm test
+node server.js
+node --test model.test.js excel-export.test.js planner-model.test.js planner-export.test.js
 ```
 
-Open http://127.0.0.1:4173. Serve through HTTP (JavaScript modules do not support opening index.html directly as a file).
+Open http://127.0.0.1:4173. Application files are plain HTML, CSS and ES modules. Supabase and SheetJS browser libraries are vendored; see [THIRD-PARTY.md](THIRD-PARTY.md).
 
-## GitHub Pages
+The automated suite covers guest counting, migrations, Excel values, money calculations, reminders and seating. `planner-security-test.sql` checks database permissions and conflicts inside a transaction and rolls back all synthetic records. It passed against the configured project on 26 October 2026. Actual two-device sign-in and email delivery remain user acceptance checks.
 
-In repository **Settings → Pages**, choose **Deploy from a branch**, select **main** and **/ (root)**, and save. The app uses relative asset URLs to work at a repository subpath.
-
-## Validation
-
-Node tests cover invitation counting, sheet isolation, nested branch paths/deletion, backup round trips, duplicate IDs, malformed records, and excessive nesting. Browser checks cover sheet creation, adding/selecting people, list rendering and reload persistence.
+See [PLANNER-SCOPE.md](PLANNER-SCOPE.md) for release scope. Keep regular JSON backups. Online sync checks every 20 seconds; it is not live simultaneous document editing.
